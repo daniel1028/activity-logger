@@ -35,7 +35,7 @@
 			</props>
 		</property>
 	</bean>
- <bean id="filePath"
+	<bean id="filePath"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
 			<props>
@@ -59,7 +59,7 @@
 			</props>
 		</property>
 	</bean>
- 
+
 	<!-- Redis configuration -->
 	<bean id="redisLongTemplate" class="org.springframework.data.redis.core.RedisTemplate">
 		<property name="connectionFactory" ref="redisConnectionFactory" />
@@ -72,9 +72,9 @@
 	<bean id="redisConnectionFactory"
 		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
 		<property name="hostName" value="${redis.server.host}" />
-		 <property name="port" value="${redis.server.port}" />
+		<property name="port" value="${redis.server.port}" />
 	</bean>
-	
+
 	<!-- Mailer configuration -->
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="smtp.gmail.com" />
@@ -113,6 +113,17 @@
 			</props>
 		</property>
 	</bean>
+	<!-- kafka consumer thread -->
+
+	<bean id="kafkaConsumerThreadPool" class="java.lang.Thread"
+		init-method="start" destroy-method="interrupt">
+		<constructor-arg ref="consumerThread" />
+	</bean>
+
+	<bean id="consumerThread" class="org.log.kafka.consumer.DataLoader"
+		destroy-method="shutdownMessageConsumer" />
+	<!-- kafka log-writter thread -->
+
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
@@ -122,5 +133,5 @@
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 	</bean>
-		
+
 </beans>

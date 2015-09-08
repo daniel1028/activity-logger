@@ -31,7 +31,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 		return cassandraDao;
 	}
 	
-	private static SimpleDateFormat minuteDateFormatter = new SimpleDateFormat("yyyyMMddkkmm");
+	private static final SimpleDateFormat minuteDateFormatter = new SimpleDateFormat("yyyyMMddkkmm");
 	
 	@Override
 	public void processMessage(Event event) {

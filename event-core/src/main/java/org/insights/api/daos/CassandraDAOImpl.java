@@ -39,7 +39,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
 
-	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_ONE;
+	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
 	
 	/**
 	 * This method using to read data with single Key&Indexed column.

@@ -56,10 +56,10 @@
 		<profile>
 			<id>insights-api</id>
 			<modules>
-				<module>insights-v1-api</module>
-				 <module>kafka-consumer</module>
-                <module>kafka-producer</module>
                 <module>event-core</module>
+				<module>insights-v1-api</module>
+			 	<module>kafka-consumer</module>
+                <module>kafka-producer</module>
 			</modules>
 		</profile>
 		<profile>

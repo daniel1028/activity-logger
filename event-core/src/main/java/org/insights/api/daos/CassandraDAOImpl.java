@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.insights.api.constants.Constants;
 import org.insights.api.model.Event;
@@ -30,6 +31,7 @@ import com.netflix.astyanax.query.IndexQuery;
 import com.netflix.astyanax.retry.ConstantBackoff;
 import com.netflix.astyanax.serializers.StringSerializer;
 import com.netflix.astyanax.util.RangeBuilder;
+import com.netflix.astyanax.util.TimeUUIDUtils;
 @Repository
 public class CassandraDAOImpl extends CassandraConnectionProvider implements CassandraDAO,Constants {
 
@@ -428,7 +430,6 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	public Collection<String> getKey(String cfName, Map<String, Object> columns) {
 
 		try {
-
 			IndexQuery<String, String> cfQuery = getKeyspace().prepareQuery(this.accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 					.withRetryPolicy(new ConstantBackoff(2000, 5)).searchWithIndex();
 
@@ -556,7 +557,6 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	 * @param columnValueList
 	 */
 	public void saveBulkList(String cfName, String key, Map<String, Object> columnValueList) {
-
 		MutationBatch mutation = getKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 
 		ColumnListMutation<String> m = mutation.withRow(this.accessColumnFamily(cfName), key);
@@ -923,7 +923,6 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	 * @param event
 	 */
 	public void updateTimelineObject(String cfName, String rowKey, String CoulmnValue, Event event) {
-
 		// UUID eventColumnTimeUUID = TimeUUIDUtils.getUniqueTimeUUIDinMillis();
 
 		MutationBatch eventTimeline = getKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
@@ -965,5 +964,46 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Saving events in event_detail column family for 1.0 logapi version events.
+	 * 
+	 * @param cfName
+	 * @param key
+	 * @param event
+	 * @return
+	 */
+	public String saveEvent(String cfName, String key, Event event) {
+		if (event.getEventId() == null) {
+			UUID eventKeyUUID = TimeUUIDUtils.getUniqueTimeUUIDinMillis();
+			key = eventKeyUUID.toString();
+		} else {
+			key = event.getEventId();
+		}
 
+		MutationBatch m = getKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
+
+		m.withRow(this.accessColumnFamily(cfName), key)
+				.putColumnIfNotNull(_START_TIME, event.getStartTime(), null)
+				.putColumnIfNotNull(_END_TIME, event.getEndTime(), null)
+				.putColumnIfNotNull(FIELDS, event.getFields(), null)
+				.putColumnIfNotNull(_TIME_SPENT_IN_MILLIS, event.getTimeInMillSec(), null)
+				.putColumnIfNotNull(_CONTENT_GOORU_OID, event.getContentGooruId(), null)
+				.putColumnIfNotNull(_PARENT_GOORU_OID, event.getParentGooruId(), null)
+				.putColumnIfNotNull(_EVENT_NAME, event.getEventName(), null)
+				.putColumnIfNotNull(SESSION, event.getSession(), null)
+				.putColumnIfNotNull(METRICS, event.getMetrics(), null)
+				.putColumnIfNotNull(_PAYLOAD_OBJECT, event.getPayLoadObject(), null)
+				.putColumnIfNotNull(USER, event.getUser(), null)
+				.putColumnIfNotNull(CONTEXT, event.getContext(), null)
+				.putColumnIfNotNull(_EVENT_TYPE, event.getEventType(), null)
+				.putColumnIfNotNull(_ORGANIZATION_UID, event.getOrganizationUid(), null)
+				.putColumnIfNotNull(_PARENT_EVENT_ID, event.getParentEventId(), null);
+		try {
+			m.execute();
+		} catch (Exception e) {
+			logger.error("Exception:",e);
+		}
+		return key;
+	}
 }

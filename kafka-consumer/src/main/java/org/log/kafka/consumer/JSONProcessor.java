@@ -25,6 +25,7 @@ package org.log.kafka.consumer;
 
 import org.apache.commons.lang.StringUtils;
 import org.insights.api.model.Event;
+import org.json.JSONObject;
 
 import com.google.gson.Gson;
 

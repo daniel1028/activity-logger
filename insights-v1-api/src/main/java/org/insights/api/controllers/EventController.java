@@ -8,10 +8,10 @@ import java.util.concurrent.Executor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.insights.api.constants.Constants;
 import org.insights.api.model.Event;
 import org.insights.api.service.EventService;
+import org.insights.api.util.Serializer;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -43,19 +41,10 @@ public class EventController implements AsyncConfigurer, Constants {
 	@Autowired
 	protected EventService eventService;
 
-	private Gson gson = new Gson();
-
 	@RequestMapping(method = RequestMethod.POST, headers = "Content-Type=application/json")
 	public void trackEvent(@RequestBody String fields,
-			@RequestParam(value = "apiKey", required = true) String apiKey,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-
-		// add cross domain support
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Headers",
-				"Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
-		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST");
 		JsonElement jsonElement = null;
 		JsonArray eventJsonArr = null;
 
@@ -74,26 +63,23 @@ public class EventController implements AsyncConfigurer, Constants {
 					HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST);
 			return;
 		}
-		request.setCharacterEncoding("UTF-8");
-		Long timeStamp = System.currentTimeMillis();
-		String userAgent = request.getHeader("User-Agent");
-		String userIp = request.getHeader("X-FORWARDED-FOR");
+		 String userAgent = request.getHeader("User-Agent");
+		 String userIp = request.getHeader("X-FORWARDED-FOR");
+
 		if (userIp == null) {
 			userIp = request.getRemoteAddr();
 		}
 		for (JsonElement eventJson : eventJsonArr) {
 			JsonObject eventObj = eventJson.getAsJsonObject();
 			String eventString = eventObj.toString();
-			Event event = gson.fromJson(eventObj, Event.class);
+			System.out.print("Fields: " + eventString);
+			Event event = Serializer.buildEventObject(eventString);
 			JSONObject field = new JSONObject(eventString);
-			if (StringUtils.isNotBlank(event.getUser())) {
-				JSONObject user = new JSONObject(event.getUser());
-				user.put(USER_IP, userIp);
-				user.put(USER_AGENT, userAgent);
-				field.put(USER, user.toString());
-			}
+			Map<String,Object> user = event.getUser();
+			user.put(USER_IP, userIp);
+			user.put(USER_AGENT, userAgent);
+			field.put(USER, user.toString());
 			event.setFields(field.toString());
-			event.setApiKey(apiKey);
 			eventService.processMessage(event);
 		}
 
@@ -127,5 +113,5 @@ public class EventController implements AsyncConfigurer, Constants {
 		executor.initialize();
 		return executor;
 	}
-
+	
 }

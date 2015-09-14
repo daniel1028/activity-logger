@@ -16,4 +16,6 @@ public interface CassandraDAO {
 	
 	public void updateTimelineObject(String cfName, String rowKey, String CoulmnValue, Event event);
 	
+	public void indexEvent(Event event);
+	
 }

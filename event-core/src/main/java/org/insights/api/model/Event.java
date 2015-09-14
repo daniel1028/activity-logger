@@ -1,6 +1,7 @@
 package org.insights.api.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class Event implements Serializable {
 
@@ -9,76 +10,25 @@ public class Event implements Serializable {
 	 */
 	private static final long serialVersionUID = -1438385342930630628L;
 
-	private String context;
+	private Map<String, Object> context;
 	
-	private String user;
+	private Map<String, Object> user;
 	
-	private String payLoadObject;
+	private Map<String, Object> payLoadObject;
 	
-	private String metrics;
+	private Map<String, Object> metrics;
 	
-	private String session;
+	private Map<String, Object> session;
 
 	private Long startTime;
 	
 	private Long endTime;
 	
-	// Added Specially for Creating the Event
-	private String apiKey;
-	
 	private String eventName;
 	
-	private String contentGooruId;
-	
-	private String parentGooruId;
-	
-	private Long timeInMillSec;
-	
-	private String fields;
-	
 	private String eventId;
-	
-	private String parentEventId;
-	
-	private String version;
 
-	private String eventType;
-
-	private String organizationUid;
-	
-	private Long hitCount;
-	
-	public Long getHitCount() {
-		return hitCount;
-	}
-
-	public void setHitCount(Long hitCount) {
-		this.hitCount = hitCount;
-	}
-
-	public String getEventType() {
-		return eventType;
-	}
-
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
-	}
-
-	public String getOrganizationUid() {
-		return organizationUid;
-	}
-
-	public void setOrganizationUid(String organizationUid) {
-		this.organizationUid = organizationUid;
-	}
-
-	public String getParentEventId() {
-		return parentEventId;
-	}
-
-	public void setParentEventId(String parentEventId) {
-		this.parentEventId = parentEventId;
-	}
+	private String fields;
 
 	public Long getStartTime() {
 		return startTime;
@@ -104,28 +54,52 @@ public class Event implements Serializable {
 		this.eventName = eventName;
 	}
 
-	public String getContentGooruId() {
-		return contentGooruId;
+	public String getEventId() {
+		return eventId;
 	}
 
-	public void setContentGooruId(String contentGooruId) {
-		this.contentGooruId = contentGooruId;
+	public void setEventId(String eventId) {
+		this.eventId = eventId;
 	}
 
-	public String getParentGooruId() {
-		return parentGooruId;
+	public Map<String, Object> getContext() {
+		return context;
 	}
 
-	public void setParentGooruId(String parentGooruId) {
-		this.parentGooruId = parentGooruId;
+	public void setContext(Map<String, Object> context) {
+		this.context = context;
 	}
 
-	public Long getTimeInMillSec() {
-		return timeInMillSec;
+	public Map<String, Object> getUser() {
+		return user;
 	}
 
-	public void setTimeInMillSec(Long timeInMillSec) {
-		this.timeInMillSec = timeInMillSec;
+	public void setUser(Map<String, Object> user) {
+		this.user = user;
+	}
+
+	public Map<String, Object> getPayLoadObject() {
+		return payLoadObject;
+	}
+
+	public void setPayLoadObject(Map<String, Object> payLoadObject) {
+		this.payLoadObject = payLoadObject;
+	}
+
+	public Map<String, Object> getMetrics() {
+		return metrics;
+	}
+
+	public void setMetrics(Map<String, Object> metrics) {
+		this.metrics = metrics;
+	}
+
+	public Map<String, Object> getSession() {
+		return session;
+	}
+
+	public void setSession(Map<String, Object> session) {
+		this.session = session;
 	}
 
 	public String getFields() {
@@ -135,69 +109,4 @@ public class Event implements Serializable {
 	public void setFields(String fields) {
 		this.fields = fields;
 	}
-
-	public String getEventId() {
-		return eventId;
-	}
-
-	public void setEventId(String eventId) {
-		this.eventId = eventId;
-	}
-
-	public String getContext() {
-		return context;
-	}
-
-	public void setContext(String context) {
-		this.context = context;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getPayLoadObject() {
-		return payLoadObject;
-	}
-
-	public void setPayLoadObject(String payLoadObject) {
-		this.payLoadObject = payLoadObject;
-	}
-
-	public String getMetrics() {
-		return metrics;
-	}
-
-	public void setMetrics(String metrics) {
-		this.metrics = metrics;
-	}
-
-	public String getSession() {
-		return session;
-	}
-
-	public void setSession(String session) {
-		this.session = session;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public String getApiKey() {
-		return apiKey;
-	}
-
-	public void setApiKey(String apiKey) {
-		this.apiKey = apiKey;
-	}
-
 }

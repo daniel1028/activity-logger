@@ -55,6 +55,7 @@
 				<prop key="cluster.hosts">${cluster.hosts}</prop>
 				<prop key="log.keyspace">${log.keyspace}</prop>
 				<prop key="log.datacentre">${log.datacentre}</prop>
+				<prop key="elasticsearch.hosts">${elasticsearch.hosts}</prop>
 
 			</props>
 		</property>

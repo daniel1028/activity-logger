@@ -1,5 +1,7 @@
 package org.insights.api.daos;
 
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.insights.api.constants.Constants;
 import org.insights.api.model.Event;
 import org.slf4j.Logger;
@@ -32,14 +35,15 @@ import com.netflix.astyanax.retry.ConstantBackoff;
 import com.netflix.astyanax.serializers.StringSerializer;
 import com.netflix.astyanax.util.RangeBuilder;
 import com.netflix.astyanax.util.TimeUUIDUtils;
+
 @Repository
 public class CassandraDAOImpl extends CassandraConnectionProvider implements CassandraDAO,Constants {
 
 	private static final Logger logger = LoggerFactory.getLogger(CassandraDAOImpl.class);
 
-	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
-
-	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
+	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss+0000");
+	
+	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_ONE;
 	
 	/**
 	 * This method using to read data with single Key&Indexed column.
@@ -986,24 +990,36 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		m.withRow(this.accessColumnFamily(cfName), key)
 				.putColumnIfNotNull(_START_TIME, event.getStartTime(), null)
 				.putColumnIfNotNull(_END_TIME, event.getEndTime(), null)
-				.putColumnIfNotNull(FIELDS, event.getFields(), null)
-				.putColumnIfNotNull(_TIME_SPENT_IN_MILLIS, event.getTimeInMillSec(), null)
-				.putColumnIfNotNull(_CONTENT_GOORU_OID, event.getContentGooruId(), null)
-				.putColumnIfNotNull(_PARENT_GOORU_OID, event.getParentGooruId(), null)
+				.putColumnIfNotNull(FIELDS, event.getFields().toString(), null)
 				.putColumnIfNotNull(_EVENT_NAME, event.getEventName(), null)
-				.putColumnIfNotNull(SESSION, event.getSession(), null)
-				.putColumnIfNotNull(METRICS, event.getMetrics(), null)
-				.putColumnIfNotNull(_PAYLOAD_OBJECT, event.getPayLoadObject(), null)
-				.putColumnIfNotNull(USER, event.getUser(), null)
-				.putColumnIfNotNull(CONTEXT, event.getContext(), null)
-				.putColumnIfNotNull(_EVENT_TYPE, event.getEventType(), null)
-				.putColumnIfNotNull(_ORGANIZATION_UID, event.getOrganizationUid(), null)
-				.putColumnIfNotNull(_PARENT_EVENT_ID, event.getParentEventId(), null);
+				;
 		try {
 			m.execute();
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error("Exception:",e);
 		}
 		return key;
 	}
+
+	public void indexEvent(Event event){
+		try {
+			XContentBuilder contentBuilder = jsonBuilder().startObject();
+			contentBuilder.field(EVENT_NAME, event.getEventName());
+			contentBuilder.field(START_TIME, event.getStartTime());
+			contentBuilder.field(END_TIME, event.getEndTime());
+			contentBuilder.field(EVENT_TIME, new Date(event.getStartTime()));
+			contentBuilder.field(METRICS, event.getMetrics());
+			contentBuilder.field(CONTEXT, event.getContext());
+			contentBuilder.field(SESSION, event.getSession());
+			contentBuilder.field(USER, event.getUser());
+			contentBuilder.field(PAY_LOAD_OBJECT, event.getPayLoadObject());
+			contentBuilder.field(FIELD,event.getFields());
+			contentBuilder.field(INDEX_UPDATED_TIME, new Date());
+			getESClient().prepareIndex(ESIndices.EVENTLOGGERINFO.getIndex(),ESIndices.EVENTLOGGERINFO.getType(), event.getEventId()).setSource(contentBuilder).execute().actionGet();
+		} catch (Exception e) {
+			logger.error("Exception:",e);
+		}
+	}
+
 }
